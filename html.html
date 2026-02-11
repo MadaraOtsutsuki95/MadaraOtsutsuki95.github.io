@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Игра: Шаринганы внутри черного квадрата с рамкой</title>
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url('naruto.png') no-repeat center center; /* фон Наруто */
+        background-size: cover;
+        font-family: Arial, sans-serif;
+    }
+
+    .game {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Черный квадрат по центру — игровая зона */
+    .center-square {
+        position: relative;
+        width: 350px;
+        height: 350px;
+        background: #000; /* черный фон */
+        border: 5px solid #fff; /* рамка — белая */
+        box-shadow: 0 0 15px rgba(255,255,255,0.7);
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px;
+        box-sizing: border-box;
+    }
+
+    /* Таймер и очки в рамке квадрата */
+    .score-time {
+        position: absolute;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 10px;
+        color: #fff;
+        font-weight: bold;
+        z-index: 2;
+        pointer-events: none; /* чтобы клики проходили к Шаринганам */
+        font-size: 16px;
+    }
+
+    /* Шаринганы */
+    .sharingan {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+        z-index: 3;
+    }
+
+    .sharingan img {
+        width: 60px;
+        height: 60px;
+        display: block;
+    }
+</style>
+</head>
+<body>
+
+<div class="game">
+    <div class="center-square" id="centerSquare">
+        <!-- рамка для таймера и очков -->
+        <div class="score-time">
+            <div>Время: <span id="time">60</span></div>
+            <div>Очки: <span id="score">0</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const centerSquare = document.getElementById("centerSquare");
+const timeEl = document.getElementById("time");
+const scoreEl = document.getElementById("score");
+
+let score = 0;
+let timeLeft = 60;
+let squareLife = 3000; // 3 секунды
+
+const sharinganURL = "sharingan.png"; // путь к файлу Шаринган
+
+function spawnSharingan() {
+    if (timeLeft <= 0) return;
+
+    const sh = document.createElement("div");
+    sh.className = "sharingan";
+
+    const img = document.createElement("img");
+    img.src = sharinganURL;
+    sh.appendChild(img);
+
+    const size = 60;
+    const maxX = centerSquare.clientWidth - size;
+    const maxY = centerSquare.clientHeight - size;
+
+    // случайная позиция внутри черного квадрата, но ниже верхней рамки
+    const x = Math.random() * maxX;
+    const y = Math.random() * (maxY - 20) + 20; // отступ сверху для рамки
+
+    sh.style.left = x + "px";
+    sh.style.top = y + "px";
+
+    img.onclick = () => {
+        score++;
+        scoreEl.textContent = score;
+        clearTimeout(timeout);
+        sh.remove();
+        spawnSharingan();
+    };
+
+    centerSquare.appendChild(sh);
+
+    const timeout = setTimeout(() => {
+        if (sh.parentNode) {
+            sh.remove();
+            spawnSharingan();
+        }
+    }, squareLife);
+}
+
+// Таймер
+const timerInterval = setInterval(() => {
+    timeLeft--;
+    timeEl.textContent = timeLeft;
+
+    if (timeLeft === 0) {
+        clearInterval(timerInterval);
+        alert("Игра окончена!\nОчки: " + score);
+    }
+}, 1000);
+
+// Старт игры
+spawnSharingan();
+</script>
+
+</body>
+</html>
